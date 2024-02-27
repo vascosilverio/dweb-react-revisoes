@@ -9,10 +9,9 @@ function App() {
   return (
     <div className='custom container'>
       <div className='row'>
-        <OlaDweb />
+        <Todo />
       </div>
-      <br />
-      <Todo />
+      
 
     </div>
   );

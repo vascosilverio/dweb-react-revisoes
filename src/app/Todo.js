@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getTarefas } from "../service/api";
 
 function Todo() {
     const [desc, setDesc] = useState('');
@@ -22,7 +23,7 @@ function Todo() {
     }
 
     useEffect(()=>{
-        fetch("https://spring-server.azurewebsites.net/todo/getTarefas")
+        getTarefas()
         .then((res)=>{
             return res.json();
         })

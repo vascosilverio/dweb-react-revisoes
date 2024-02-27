@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getTarefasApi } from "../service/api";
 
 function Todo() {
     const [tarefa, setTarefa] = useState('');
@@ -12,7 +13,7 @@ function Todo() {
 
     // metodo nao bloqueante
     const getTarefas = async () => {
-        fetch("https://spring-server.azurewebsites.net/todo/getTarefas")
+        getTarefasApi()
             .then(res => {
                 return res.json();
             })
@@ -53,10 +54,10 @@ function Todo() {
 
         </div>
 
-        <ul className="mt-5">
+        <ul className="mt-5" style={{height:"30vh", overflowY:"scroll"}}>
             {
                 listaTarefas.map(elem => {
-                    return <li className="form-control">{elem.descricao}</li>
+                    return <li className="form-control">{elem.descricao}--{elem.id}</li>
                 })
             }
 

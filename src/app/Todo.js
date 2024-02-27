@@ -6,9 +6,21 @@ function Todo() {
     const [dataConc, setDataConc] = useState('');
     const [listaTarefas, setLista] = useState([]);
 
-    const addTarefa = () => {
-        
-    }
+    useEffect(()=>{
+        fetch("https://spring-server.azurewebsites.net/todo/getTarefas")
+        .then((res)=>{
+            return res.json();
+        })
+        .then((res)=>{
+            setLista(res.rows);
+        })
+        .catch((error)=>{
+            alert(error);
+        });
+
+    }, []);
+
+
 
     return <>
         <div className="row">
@@ -28,8 +40,7 @@ function Todo() {
             </div>
         </div>
 
-        <br />
-        <div className="row">
+        <div className="row mt-5">
             <div className="col-md-3">
                 <p>Data de Conclusão: </p>
             </div>
@@ -37,6 +48,15 @@ function Todo() {
                 <input className="form-control" type="date" value={dataConc} onChange={evt => setDataConc(evt.target.value)} />
             </div>
         </div>
+
+
+        <ul className="mt-5">
+            {
+                listaTarefas.map((tarefa) => {
+                    return <li className="form-control mt-1">{tarefa.descricao}</li>
+                })
+            }
+        </ul>
     </>;
 }
 

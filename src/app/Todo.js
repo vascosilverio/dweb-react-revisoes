@@ -1,39 +1,59 @@
 import { useEffect, useState } from "react";
-import { getTarefas } from "../service/api";
+import { createTarefaAPI, deleteTarefasAPI, getTarefasAPI } from "../service/api";
 
 function Todo() {
     const [desc, setDesc] = useState('');
     const [dataConc, setDataConc] = useState(new Date().toISOString().split("T")[0]);
     const [listaTarefas, setLista] = useState([]);
 
-    const addTarefaApi = () => {
-        var obj = {descricao: desc, "dataConclusao": new Date(dataConc).toJSON()};
-
-
-        fetch("https://spring-server.azurewebsites.net/todo/createTarefa", {
-            body: JSON.stringify(obj),
-            headers: {
-              Accept: "*/*",
-              "Content-Type": "application/json"
-            },
-            method: "POST"
-          })
-          .then(res => res.json())
-          .then(res => alert(res));
-    }
-
-    useEffect(()=>{
-        getTarefas()
-        .then((res)=>{
+    const handleDeleteTarefa = (id) => {
+        deleteTarefasAPI(id)
+        .then((res) => {
             return res.json();
         })
         .then((res)=>{
-            setLista(res.rows);
-        })
-        .catch((error)=>{
-            alert(error);
+           handleGetListaTarefas();
         });
 
+        
+    }
+
+    // atualiza a lista de tarefas da API
+    const handleGetListaTarefas = () => {
+        getTarefasAPI()
+            .then((res) => {
+                return res.json();
+            })
+            .then((res) => {
+                setLista(res.rows);
+            })
+            .catch((error) => {
+                alert(error);
+            });
+    }
+
+    // adiciona tarefa na api
+    const handleCreateTarefa = () => {
+        if (desc == '') {
+            alert("Preencha sff a descrição da tarefa");
+            return
+        }
+
+        let tarefa = { descricao: desc, "dataConclusao": new Date(dataConc).toJSON() };
+
+
+        createTarefaAPI(tarefa)
+            .then(res => res.json())
+            .then(res => {
+                    setDesc('');
+                    alert('Tarefa criada com sucesso');
+                    handleGetListaTarefas();
+            });
+    }
+
+    // corre a primeira vez que o componente monta
+    useEffect(() => {
+        handleGetListaTarefas();
     }, []);
 
 
@@ -56,13 +76,27 @@ function Todo() {
         </div>
 
         <div className="row">
-            <input type="text"/>
+            <div className="col-md-3">
+                <button type="button" onClick={() => { handleCreateTarefa() }} class="btn btn-secondary">Criar tarefa</button>
+            </div>
         </div>
 
-        <ul className="mt-5" style={{overflowY: "scroll", height: "50vh"}}>
+        <ul className="mt-5" style={{ overflowY: "scroll", height: "70vh" }}>
             {
                 listaTarefas.map((tarefa) => {
-                    return <li className="form-control mt-1">{tarefa.descricao}</li>
+                    return <li className="form-control mt-1">
+                        <div className="row">
+                            <div className="col-md-5 col-sm-12">
+                                <h4>{tarefa.descricao}</h4>
+                            </div>
+                            <div className="col-md-4 col-sm-8">
+                                <p>Concluir até {tarefa.dataConclusao}</p>
+                            </div>
+                            <div className="col-md-3 col-sm-4">
+                                <button onClick={()=> {handleDeleteTarefa(tarefa.id)}} type="button" class="btn btn-danger float-end">Danger</button>
+                            </div>
+                        </div>
+                    </li>
                 })
             }
         </ul>

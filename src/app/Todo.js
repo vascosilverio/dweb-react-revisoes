@@ -1,23 +1,34 @@
 import { useEffect, useState } from "react";
-import { getTarefasApi } from "../service/api";
+import {createTarefaApi, deleteTarefasApi, getTarefasApi } from "../service/api";
 
 function Todo() {
     const [tarefa, setTarefa] = useState('');
-    const [dataConc, setDataConc] = useState(new Date());
+    const [dataConc, setDataConc] = useState('');
     const [listaTarefas, setLista] = useState([]);
 
+    const handleDeleteTarefa = (id) => {
+        deleteTarefasApi(id)
+            .then((res) => {
+                return res.json();
+            })
+            .then((res) => {
+                handleGetListaTarefas();
+            });
+    }
+
+    // corre a primeira vez
     useEffect(() => {
-        getTarefas();
+        handleGetListaTarefas();
     }, []);
 
 
     // metodo nao bloqueante
-    const getTarefas = async () => {
+    const handleGetListaTarefas = async () => {
         getTarefasApi()
             .then(res => {
                 return res.json();
             })
-            .then((res) => {
+            .then((res) => {                
                 setLista(res.rows);
             });
     }
@@ -28,8 +39,28 @@ function Todo() {
         res = res.json();
     }
 
-    const addTarefaApi = () => {
+    // adiciona tarefa na api
+    const handleCreateTarefa = () => {
+        if (tarefa == '') {
+            alert("Preencha sff a descrição da tarefa");
+            return
+        }
 
+        if(dataConc== ''){
+            alert("Preencha sff a data de conclusão");
+            return
+        }
+
+        let obj = { descricao: tarefa, "dataConclusao": new Date(dataConc).toJSON() };
+
+        createTarefaApi(obj)
+            .then(res => res.json())
+            .then(res => {
+                setTarefa('');
+                setDataConc('')
+                alert('Tarefa criada com sucesso');
+                handleGetListaTarefas();
+            });
     }
 
     return <>
@@ -49,15 +80,27 @@ function Todo() {
             </div>
         </div>
 
-        <div className="row mt-5">
-            <div className="col-md-4 col-sm-9"><input className='form-control' type='button' onClick={() => { getTarefasSincrono() }} value={"Adicionar Tarefa"} /></div>
+        <div className="row mt-2">
+            <div className="col-md-4 col-sm-9"><input className='form-control' type='button' onClick={() => { handleCreateTarefa() }} value={"Adicionar Tarefa"} /></div>
 
         </div>
 
-        <ul className="mt-5" style={{height:"30vh", overflowY:"scroll"}}>
+        <ul className="mt-5" style={{ height: "50vh", overflowY: "scroll" }}>
             {
-                listaTarefas.map(elem => {
-                    return <li className="form-control">{elem.descricao}--{elem.id}</li>
+                listaTarefas.map((tarefa) => {
+                    return <li className="form-control mt-1">
+                        <div className="row">
+                            <div className="col-md-5 col-sm-12">
+                                <h4>{tarefa.descricao}</h4>
+                            </div>
+                            <div className="col-md-4 col-sm-8">
+                                <p>Concluir até {tarefa.dataConclusao}</p>
+                            </div>
+                            <div className="col-md-3 col-sm-4">
+                                <button onClick={() => { handleDeleteTarefa(tarefa.id) }} type="button" class="btn btn-danger float-end">Danger</button>
+                            </div>
+                        </div>
+                    </li>
                 })
             }
 

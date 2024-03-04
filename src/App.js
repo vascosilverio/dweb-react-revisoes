@@ -8,13 +8,7 @@ function App() {
   
 
   return (
-    <div className='custom container'>
-      <div className='row'>
-        <OlaDweb />
-      </div>
-      
-      <br />
-
+    <div className='custom container pt-3'>
       <Todo />
       
     </div>

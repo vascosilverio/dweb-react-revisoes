@@ -1,24 +1,44 @@
 import { useEffect, useState } from "react";
-import {createTarefaApi, deleteTarefasApi, getTarefasApi } from "../service/api";
+import { createTarefaApi, deleteTarefasApi, getTarefasApi } from "../service/api";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 function Todo() {
     const [tarefa, setTarefa] = useState('');
     const [dataConc, setDataConc] = useState('');
     const [listaTarefas, setLista] = useState([]);
 
-    const handleDeleteTarefa = (id) => {
-        deleteTarefasApi(id)
+    // variavel que controla o Modal
+    const [show, setShow] = useState(false);
+    const [idTarefaDelete, setIdTarefaDelete] = useState(0);
+
+    const handleClose = (isToDelete) => {
+        if(isToDelete){
+            deleteTarefasApi(idTarefaDelete)
             .then((res) => {
                 return res.json();
             })
             .then((res) => {
-                handleGetListaTarefas();
+                if(!res.success){
+                    alert(res.message);
+                }
             });
+        }
+
+        setShow(false);
+    };
+    const handleShow = (id) => {setShow(true);setIdTarefaDelete(id)};
+
+    const handleDeleteTarefa = (id) => {
+        handleShow(id);
     }
 
     // corre a primeira vez
     useEffect(() => {
-        handleGetListaTarefas();
+        setInterval(() => {
+            handleGetListaTarefas();
+        }, 1000);
+
     }, []);
 
 
@@ -28,7 +48,7 @@ function Todo() {
             .then(res => {
                 return res.json();
             })
-            .then((res) => {                
+            .then((res) => {
                 setLista(res.rows);
             });
     }
@@ -46,7 +66,7 @@ function Todo() {
             return
         }
 
-        if(dataConc== ''){
+        if (dataConc == '') {
             alert("Preencha sff a data de conclusão");
             return
         }
@@ -59,7 +79,6 @@ function Todo() {
                 setTarefa('');
                 setDataConc('')
                 alert('Tarefa criada com sucesso');
-                handleGetListaTarefas();
             });
     }
 
@@ -92,19 +111,33 @@ function Todo() {
                         <div className="row">
                             <div className="col-md-5 col-sm-12">
                                 <h4>{tarefa.descricao}</h4>
+                                <p>{tarefa.id}</p>
                             </div>
                             <div className="col-md-4 col-sm-8">
                                 <p>Concluir até {tarefa.dataConclusao}</p>
                             </div>
                             <div className="col-md-3 col-sm-4">
-                                <button onClick={() => { handleDeleteTarefa(tarefa.id) }} type="button" class="btn btn-danger float-end">Danger</button>
+                                <button onClick={() => { handleDeleteTarefa(tarefa.id) }} type="button" class="btn btn-danger float-end">Apagar Tarefa</button>
                             </div>
                         </div>
                     </li>
                 })
             }
-
         </ul>
+
+        <Modal show={show} onHide={()=>handleClose(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>Quer mesmo apagar a tarefa {idTarefaDelete}?</Modal.Title>
+            </Modal.Header>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={()=>handleClose(false)}>
+                    Fechar 
+                </Button>
+                <Button variant="danger" onClick={()=>handleClose(true)}>
+                    Apagar
+                </Button>
+            </Modal.Footer>
+        </Modal>
     </>;
 }
 

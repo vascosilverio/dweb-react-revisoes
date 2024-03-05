@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
-import { createTarefaApi, deleteTarefasApi, getTarefasApi } from "../service/api";
+import { createTarefaApi, deleteTarefasApi, editTarefaApi, getTarefasApi } from "../service/api";
 
 // imports for the modal
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+
+var taskReference = {
+    id: 0,
+    descricao: '',
+    dataConclusao: ''
+};
 
 function Todo() {
     const [desc, setDesc] = useState('');
@@ -14,24 +20,39 @@ function Todo() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idTaskDel, setIdTaskDel] = useState(0);
 
-    const handleCloseDeleteModal = (isToDelete) =>{
-        if(isToDelete){
+    // 
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [taskToEdit, setTaskToEdit] = useState({ ...taskReference });
+
+    // is called when the delete modal closes
+    const handleCloseDeleteModal = (isToDelete) => {
+        if (isToDelete) {
             deleteTarefasApi(idTaskDel)
-            .then((res) => {
-                return res.json();
-            })
-            .then((res)=>{
-            });
+                .then((res) => {
+                    return res.json();
+                })
+                .then((res) => {
+                    if(!res.success){
+                        alert(res.message);
+                    }
+                });
         }
-        
+
         setShowDeleteModal(false);
-    } ;
+    };
     const handleShowDeleteModal = () => setShowDeleteModal(true);
 
+    // is called when user first clicks on the button
     const handleDeleteTarefa = (id) => {
         setIdTaskDel(id)
 
         handleShowDeleteModal();
+    }
+
+    // is called when user first clicks on the button
+    const handleEditTarefa = (tarefa) => {
+        setTaskToEdit({ ...tarefa });
+        setShowEditModal(true);
     }
 
     // atualiza a lista de tarefas da API
@@ -68,7 +89,7 @@ function Todo() {
 
     // corre a primeira vez que o componente monta
     useEffect(() => {
-        setInterval(()=>{
+        setInterval(() => {
             handleGetListaTarefas();
         }, 1000);
     }, []);
@@ -112,6 +133,7 @@ function Todo() {
                             </div>
                             <div className="col-md-3 col-sm-4">
                                 <button onClick={() => { handleDeleteTarefa(tarefa.id) }} type="button" class="btn btn-danger float-end">Delete</button>
+                                <button onClick={() => { handleEditTarefa(tarefa) }} type="button" class="btn btn-warning float-end">Edit</button>
                             </div>
                         </div>
                     </li>
@@ -119,17 +141,66 @@ function Todo() {
             }
         </ul>
 
-        <Modal show={showDeleteModal} onHide={()=> {
+        <Modal show={showDeleteModal} onHide={() => {
             handleCloseDeleteModal(false);
         }}>
             <Modal.Header closeButton>
                 <Modal.Title>Do you really wanna delete the task with id: {idTaskDel}</Modal.Title>
             </Modal.Header>
             <Modal.Footer>
-                <Button variant="secondary" onClick={()=> handleCloseDeleteModal(false)}>
+                <Button variant="secondary" onClick={() => handleCloseDeleteModal(false)}>
                     Close
                 </Button>
                 <Button variant="primary" onClick={() => handleCloseDeleteModal(true)}>
+                    Save Changes
+                </Button>
+            </Modal.Footer>
+        </Modal>
+
+        <Modal size="lg" show={showEditModal} onHide={() => {
+            setShowEditModal(false);
+        }}>
+            <Modal.Header closeButton>
+                <Modal.Title>Edit task with id: {taskToEdit.id}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div className="row">
+                    <div className="col-md-2">
+                        <p>Descricao: </p>
+                    </div>
+                    <div className="col-md-4">
+                        <input className="form-control" type="text" value={taskToEdit.descricao}
+                            onChange={evt => {
+                                // let aux = {...taskToEdit};
+                                // aux.descricao = evt.target.value;
+                                // setTaskToEdit(aux);
+                                setTaskToEdit({ ...taskToEdit, descricao: evt.target.value });
+                            }} />
+                    </div>
+
+                    <div className="col-md-3">
+                        <p>Data de Conclusão: </p>
+                    </div>
+                    <div className="col-md-3">
+                        <input className="form-control" type="date" value={taskToEdit.dataConclusao.substring(0, 10)}
+                            onChange={evt => setTaskToEdit({ ...taskToEdit, dataConclusao: evt.target.value })} />
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={() => {
+                    editTarefaApi(taskToEdit)
+                    .then(res => {
+                        return res.json();
+                    })
+                    .then(res => {
+                        setShowEditModal(false)
+                    })
+                    
+                }}>
                     Save Changes
                 </Button>
             </Modal.Footer>

@@ -1,34 +1,70 @@
 import { useEffect, useState } from "react";
-import { createTarefaAPI, deleteTarefasAPI, getTarefasAPI } from "../service/api";
+import { createTarefaAPI, deleteTarefasAPI, editTarefasAPI, getTarefasAPI } from "../service/api";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+
+var tarefaObject = {
+    id: 0,
+    descricao: '',
+    dataConclusao: ''
+}
 
 function Todo() {
     const [desc, setDesc] = useState('');
     const [dataConc, setDataConc] = useState(new Date().toISOString().split("T")[0]);
-    const [listaTarefas, setLista] = useState([]);
-    // variavel de state que controla o modal
-    const [show, setShow] = useState(false);
+    const [listaTarefas, setLista] = useState([{...tarefaObject}]);
+    // variavel que controla o modal do delete
+    const [showDelete, setShowDelete] = useState(false);
     const [idTarefaToDelete, setIdTarefaToDelete] = useState(0);
 
-    // funcao a ser chamada pelo Modal
-    const handleCloseModal = (isToSave) => {
-        if(isToSave){
+    // variavel que controla o modal de edit
+    const [showEdit, setShowEdit] = useState(false);
+    const [tarefaToEdit, setTarefaToEdit] = useState({...tarefaObject});
+
+    // funcao a ser chamada pelo Modal de delete
+    const handleCloseModalDelete = (isToSave) => {
+        if (isToSave) {
             deleteTarefasAPI(idTarefaToDelete)
-            .then((res) => {
-                return res.json();
-            })
-            .then((res) => {
-            });
+                .then((res) => {
+                    return res.json();
+                })
+                .then((res) => {
+                });
         }
 
         setIdTarefaToDelete(0);
-        setShow(false);
+        setShowDelete(false);
     }
 
+    const handleCloseModalEdit = (isToSave) => {
+        if (isToSave) {
+            editTarefasAPI(tarefaToEdit)
+                .then((res) => {
+                    console.log(res);
+                    return res.json();
+                })
+                .then((res) => {
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+        setShowEdit(false);
+    }
+
+
+    // funcao que inicializa o modal de delete
     const handleModalDeleteTarefa = (id) => {
         setIdTarefaToDelete(id);
-        setShow(true);
+        setShowDelete(true);
+    }
+
+    // funcao que inicializa o modal de edit
+    const handleModalEditTarefa = (tarefa) => {
+        setTarefaToEdit({...tarefa, 
+            dataConclusao: tarefa.dataConclusao.substring(0, 10)});
+        setShowEdit(true);
     }
 
     // atualiza a lista de tarefas da API
@@ -97,6 +133,7 @@ function Todo() {
 
         <ul className="mt-5" style={{ overflowY: "scroll", height: "70vh" }}>
             {
+                listaTarefas.length!=0 && listaTarefas[0].id!=0?
                 listaTarefas.map((tarefa) => {
                     return <li key={tarefa.id} className="form-control mt-1">
                         <div className="row">
@@ -108,25 +145,67 @@ function Todo() {
                                 <p>Concluir até {tarefa.dataConclusao}</p>
                             </div>
                             <div className="col-md-3 col-sm-4">
-                                <button onClick={() => { handleModalDeleteTarefa(tarefa.id) }} type="button" className="btn btn-danger float-end">Danger</button>
+                                <button onClick={() => { handleModalEditTarefa(tarefa) }} type="button" className="btn btn-warning float-end">Editar</button>
+                                <button onClick={() => { handleModalDeleteTarefa(tarefa.id) }} type="button" className="btn btn-danger float-end">Apagar</button>
                             </div>
                         </div>
                     </li>
-                })
+                }):
+                ''
             }
         </ul>
 
-        <Modal show={show} onHide={()=>handleCloseModal(false)}>
+        <Modal show={showDelete} onHide={() => handleCloseModalDelete(false)}>
             <Modal.Header closeButton>
-                <Modal.Title>Modal heading</Modal.Title>
+                <Modal.Title>Tem a certeza que quer apagar a tarefa: <b>{idTarefaToDelete}</b></Modal.Title>
             </Modal.Header>
-            <Modal.Body>Tem a certeza que quer apagar a tarefa: <b>{idTarefaToDelete}</b></Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={()=>handleCloseModal(false)}>
+                <Button variant="secondary" onClick={() => handleCloseModalDelete(false)}>
                     Não
                 </Button>
-                <Button variant="danger" onClick={()=>handleCloseModal(true)}>
+                <Button variant="danger" onClick={() => handleCloseModalDelete(true)}>
                     Sim
+                </Button>
+            </Modal.Footer>
+        </Modal>
+
+        <Modal size="lg" show={showEdit} onHide={() => (setShowEdit(false))}>
+            <Modal.Header closeButton>
+                <Modal.Title>Editar a tarefa: <b>{tarefaToEdit.id}</b></Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div className="row">
+                    <div className="col-md-2">
+                        <p>Descricao: </p>
+                    </div>
+                    <div className="col-md-4">
+                        <input className="form-control" type="text" 
+                        value={tarefaToEdit.descricao} 
+                        onChange={evt => {            
+                            // let aux = {...tarefaToEdit};
+                            // aux.descricao = evt.target.value;
+                            // setTarefaToEdit(aux)
+                            
+                            setTarefaToEdit({...tarefaToEdit, descricao:evt.target.value});
+                        }} />
+                    </div>
+
+                    <div className="col-md-3">
+                        <p>Data de Conclusão: </p>
+                    </div>
+                    <div className="col-md-3">
+                        <input className="form-control" type="date" 
+                        value={tarefaToEdit.dataConclusao} 
+                        onChange={evt => setTarefaToEdit({...tarefaToEdit, dataConclusao:evt.target.value})} />
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => (handleCloseModalEdit(false))}>
+                    Não
+                </Button>
+                <Button variant="danger" onClick={() => (handleCloseModalEdit(true))}>
+                    Guardar
                 </Button>
             </Modal.Footer>
         </Modal>

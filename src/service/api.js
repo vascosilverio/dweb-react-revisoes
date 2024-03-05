@@ -1,4 +1,4 @@
-export function getTarefasApi(){
+export function getTarefasApi() {
     return fetch("https://spring-server.azurewebsites.net/todo/getTarefas");
 }
 
@@ -15,10 +15,21 @@ export function createTarefaApi(tarefa) {
 }
 
 export function deleteTarefasApi(id) {
-    return fetch("https://spring-server.azurewebsites.net/todo/deleteTarefa?idTarefa="+id, {
+    return fetch("https://spring-server.azurewebsites.net/todo/deleteTarefa?idTarefa=" + id, {
         headers: {
             Accept: "*/*"
         },
         method: "DELETE"
+    })
+}
+
+export function editTarefaApi(tarefaAEditar) {
+    return fetch("https://spring-server.azurewebsites.net/todo/updateTarefa?tarefaId="+tarefaAEditar.id, {
+        body: JSON.stringify(tarefaAEditar),
+        headers: {
+            Accept: "*/*",
+            "Content-Type": "application/json"
+        },
+        method: "PUT"
     })
 }

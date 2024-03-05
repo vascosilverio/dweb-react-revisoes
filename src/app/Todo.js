@@ -67,7 +67,7 @@ function Todo() {
     useEffect(() => {
         setInterval(() => {
             handleGetListaTarefas();
-        }, 400);
+        }, 1000);
     }, []);
 
 

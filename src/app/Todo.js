@@ -89,9 +89,11 @@ function Todo() {
 
     // corre a primeira vez que o componente monta
     useEffect(() => {
+        handleGetListaTarefas();
+
         setInterval(() => {
             handleGetListaTarefas();
-        }, 1000);
+        }, 5000);
     }, []);
 
 

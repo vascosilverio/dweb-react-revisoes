@@ -2,6 +2,11 @@ export function getTarefasAPI() {
     return fetch("https://spring-server.azurewebsites.net/todo/getTarefas");
 }
 
+export function getTarefasAPIPaged(idPagina) {
+    return fetch("https://spring-server.azurewebsites.net/todo/getTarefasPaged?idPagina="+idPagina
+    +"&paginaSize=5");
+}
+
 export function createTarefaAPI(tarefa) {
     return fetch("https://spring-server.azurewebsites.net/todo/createTarefa", {
         body: JSON.stringify(tarefa),

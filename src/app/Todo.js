@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createTarefaApi, deleteTarefasApi, editTarefaApi, getTarefasApi } from "../service/api";
+import { createTarefaApi, deleteTarefasApi, editTarefaApi, getTarefasApi, getTarefasApiPaged } from "../service/api";
 
 // imports for the modal
 import CreateTarefa from "./html/CreateTarefa";
@@ -23,6 +23,9 @@ function Todo() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [taskToEdit, setTaskToEdit] = useState({ ...taskReference });
 
+    const [paginaAtual, setPaginaAtual] = useState(0);
+    const [numTotalPaginas, setNumTotalPaginas] = useState(0);
+
     // is called when the delete modal closes
     const handleCloseDeleteModal = (isToDelete) => {
         if (isToDelete) {
@@ -31,7 +34,7 @@ function Todo() {
                     return res.json();
                 })
                 .then((res) => {
-                    if(!res.success){
+                    if (!res.success) {
                         alert(res.message);
                     }
                 });
@@ -56,12 +59,13 @@ function Todo() {
 
     // atualiza a lista de tarefas da API
     const handleGetListaTarefas = () => {
-        getTarefasApi()
+        getTarefasApiPaged(paginaAtual)
             .then((res) => {
                 return res.json();
             })
             .then((res) => {
                 setLista(res.rows);
+                setNumTotalPaginas(res.message);
             })
             .catch((error) => {
                 alert(error);
@@ -71,28 +75,39 @@ function Todo() {
     // corre a primeira vez que o componente monta
     useEffect(() => {
         handleGetListaTarefas();
-
-        setInterval(() => {
-            handleGetListaTarefas();
-        }, 5000);
     }, []);
+
+    useEffect(()=>{
+        handleGetListaTarefas();
+    }, [paginaAtual]);
+
+    let arrayPaginacao = [];
 
 
 
     return <>
         <CreateTarefa />
 
-        <ul className="mt-5" style={{ overflowY: "scroll", height: "70vh" }}>
+        <ul className="mt-5" style={{ overflowY: "scroll", height: "60vh" }}>
             {
                 listaTarefas.map((tarefa) => {
-                    return <TodoItemList tarefaProp={tarefa} handleDeleteTarefaProp={handleDeleteTarefa} handleEditTarefaProp={handleEditTarefa}/>
+                    return <TodoItemList tarefaProp={tarefa} handleDeleteTarefaProp={handleDeleteTarefa} handleEditTarefaProp={handleEditTarefa} />
                 })
             }
         </ul>
 
-        <ModalsTodo handleCloseDeleteModal={handleCloseDeleteModal} idTaskDel={idTaskDel} 
-        setShowEditModal={setShowEditModal} setTaskToEdit={setTaskToEdit} taskToEdit={taskToEdit} 
-        showDeleteModal={showDeleteModal} showEditModal={showEditModal} />
+        <ModalsTodo handleCloseDeleteModal={handleCloseDeleteModal} idTaskDel={idTaskDel}
+            setShowEditModal={setShowEditModal} setTaskToEdit={setTaskToEdit} taskToEdit={taskToEdit}
+            showDeleteModal={showDeleteModal} showEditModal={showEditModal} />
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {arrayPaginacao}
+                <li class="page-item" onClick={()=>setPaginaAtual(0)}><a class="page-link">1</a></li>
+                <li class="page-item" onClick={()=>setPaginaAtual(1)}><a class="page-link">2</a></li>
+                <li class="page-item" onClick={()=>setPaginaAtual(2)}><a class="page-link">3</a></li>
+            </ul>
+        </nav>
 
     </>;
 }

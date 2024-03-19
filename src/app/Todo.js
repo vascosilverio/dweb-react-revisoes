@@ -5,6 +5,7 @@ import { createTarefaApi, deleteTarefasApi, editTarefaApi, getTarefasApi, getTar
 import CreateTarefa from "./html/CreateTarefa";
 import ItemTarefa from "./html/ItemTarefa";
 import ModalsTarefa from "./html/ModalsTarefa";
+import ContextView from "./ContextView";
 
 var taskReference = {
     id: 0,
@@ -95,6 +96,8 @@ function Todo() {
 
     return <>
         <CreateTarefa />
+
+        <ContextView />
 
         <ul className="mt-5" style={{ overflowY: "scroll", height: "65vh" }}>
             {

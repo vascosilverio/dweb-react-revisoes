@@ -5,6 +5,7 @@ import { createTarefaApi, deleteTarefasApi, editTarefaApi, getTarefasApi, getTar
 import CreateTarefa from "./html/CreateTarefa";
 import TodoItemList from "./html/TodoItemList";
 import ModalsTodo from "./html/ModalsTodo";
+import ContextView from "./ContextView";
 
 var taskReference = {
     id: 0,
@@ -13,7 +14,7 @@ var taskReference = {
 };
 
 function Todo() {
-    const [listaTarefas, setLista] = useState([]);
+    const [listaTarefas, setLista] = useState([{...taskReference}]);
 
     // variable to be used when trying to delete a task
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,15 +73,6 @@ function Todo() {
             });
     }
 
-    // corre a primeira vez que o componente monta
-    useEffect(() => {
-        handleGetListaTarefas();
-
-        setInterval(()=>{
-            handleGetListaTarefas();
-        }, 1000)
-    }, []);
-
     useEffect(()=>{
         handleGetListaTarefas();
     }, [paginaAtual]);
@@ -91,6 +83,8 @@ function Todo() {
 
     return <>
         <CreateTarefa />
+
+        <ContextView />
 
         <ul className="mt-5" style={{ overflowY: "scroll", height: "60vh" }}>
             {

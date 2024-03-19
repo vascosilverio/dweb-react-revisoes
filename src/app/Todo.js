@@ -4,6 +4,7 @@ import { createTarefaAPI, deleteTarefasAPI, editTarefasAPI, getTarefasAPI, getTa
 import CreateTarefa from "./html/CreateTarefa";
 import TodoItemLista from "./html/TodoItemLista";
 import TodoModals from "./html/TodoModals";
+import ContextView from "./html/ContextView";
 
 var tarefaObject = {
     id: 0,
@@ -88,10 +89,6 @@ function Todo() {
             });
     }
 
-    // corre a primeira vez que o componente monta
-    useEffect(() => {
-        handleGetListaTarefas();
-    }, []);
 
     useEffect(()=>{
         handleGetListaTarefas();
@@ -101,6 +98,8 @@ function Todo() {
 
     return <>
         <CreateTarefa />
+
+        <ContextView />
 
         <ul className="mt-5" style={{ overflowY: "scroll", height: "60vh" }}>
             {

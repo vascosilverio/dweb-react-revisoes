@@ -121,7 +121,7 @@ function Todo() {
             </ul>
         </nav>
 
-    </>;
+    </>
 }
 
 export default Todo;

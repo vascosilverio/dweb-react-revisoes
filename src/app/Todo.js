@@ -78,6 +78,8 @@ function Todo() {
     }, [paginaAtual]);
 
     let arrayPaginacao = [];
+    for(let i = 0; i<numTotalPaginas; i++)
+        arrayPaginacao.push(<li class="page-item" onClick={()=>setPaginaAtual(i)}><a class="page-link">{i+1}</a></li>)
 
 
 
@@ -101,9 +103,6 @@ function Todo() {
         <nav aria-label="Page navigation example">
             <ul class="pagination">
                 {arrayPaginacao}
-                <li class="page-item" onClick={()=>setPaginaAtual(0)}><a class="page-link">1</a></li>
-                <li class="page-item" onClick={()=>setPaginaAtual(1)}><a class="page-link">2</a></li>
-                <li class="page-item" onClick={()=>setPaginaAtual(2)}><a class="page-link">3</a></li>
             </ul>
         </nav>
 
